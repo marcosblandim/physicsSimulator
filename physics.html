@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #main {
+            margin-top: 0px;
+            margin-left: 0px;
+            border: 10px solid black;
+            position: absolute;
+            z-index: 1;
+        }
+        #box {
+            background-color: blue;
+            border-radius: 500px;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <div id="main">
+        Click to jump
+        <div id="box"></div>
+    </div>
+    <script>
+        // - paint.
+        // - loss per cordenate.
+        // - treshold velocity and height for stoping.
+
+        // creat box.
+        box = document.getElementById("box");
+        
+        // box funtions.
+        function getCoords(){
+            return [parseInt(box.style.marginLeft.split('px')[0]),parseInt(box.style.marginTop.split('px')[0])];
+        }
+        function setCoords(x,y){
+            box.style.marginLeft = x + 'px';
+            box.style.marginTop = y + 'px';
+        }
+        function addCoords(x,y){
+            [x0,y0] = getCoords();
+            setCoords(x+x0, y+y0);
+        }
+        function getSign(x){
+            return x < 0 ? -1 : 1;
+        }
+        document.onmousedown = (e) => {
+            box.x_vel += getSign(box.x_vel)*5;
+            box.y_vel -= 10;
+        }
+        hitGround = () => getCoords()[1] >= main.maxH-box.height;
+        hitCell = () => getCoords()[1] <= 0;
+        hitRight = () => getCoords()[0] >= main.maxW-box.width;
+        hitLeft = () => getCoords()[0] <= 0;
+
+        // init box.
+        setCoords(300,50);
+        box.width = 25;
+        box.height = 25;
+        box.style.width = box.width + 'px';
+        box.style.height = box.height + 'px';
+        box.x_vel = 3;
+        box.y_vel = 3;
+        
+        // init main.
+        main = document.getElementById("main");
+        main.maxH = 600;
+        main.maxW = 1000;
+        main.style.height = main.maxH + 'px';
+        main.style.width = main.maxW + 'px';
+        
+        // physics data.
+        // perfect colision with air resistence.
+        g = 0.05; // 0.1
+        k = 0.0005; // 0.001
+        mass = 1;
+        x_colision_loss = -0.8;
+        y_colision_loss = -0.9;
+        discrete_time = 0.5;
+
+        // functions.
+        function updateBoxVel(){
+            // air resistence.
+            y_a = g - getSign(box.y_vel)*(k/mass)*(box.y_vel**2);
+            x_a = -1*getSign(box.x_vel)*k*(box.x_vel**2);x_a=0
+            
+            // collision loss.
+            if(hitGround() || hitCell()){
+                box.y_vel *= y_colision_loss;
+                // box.y_vel -= getSign(box.y_vel)*1;
+            }
+            if(hitRight() || hitLeft()){
+                box.x_vel *= x_colision_loss;
+                // box.x_vel -= getSign(box.x_vel)*0.9;
+            }
+            
+            // update velocity.
+            box.y_vel += y_a;
+            box.x_vel += x_a;
+        }
+        function passTime(){
+            updateBoxVel();
+            addCoords(box.x_vel,box.y_vel);
+            setTimeout(passTime,discrete_time);
+        }
+        passTime();
+
+        // debug.
+        // setInterval(()=>console.log(getCoords()[1]),1)
+        // setInterval(()=>console.log(box.y_vel),1)
+    </script>
+</body>
+</html>
