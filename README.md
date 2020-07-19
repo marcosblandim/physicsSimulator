@@ -1,2 +1,2 @@
 # physicsSimulator
-Incomplete physics simulator in pure Javascript.
+Basic physics simulator in pure Javascript.
